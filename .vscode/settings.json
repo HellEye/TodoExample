@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "todo-backend-old": true,
+    "todo-backend/__pycache__": true,
+    "todo-backend/routes/__pycache__": true,
+    "todo-backend/db/__pycache__": true,
+    "todo-frontend/node_modules": true,
+    "node_modules": true
+  }
+}
