@@ -1,14 +1,14 @@
-from datetime import timedelta
-import os
-from typing import Annotated
-from fastapi import APIRouter, FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
-from errors import UnauthenticatedException
+
 from errors import InputException
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 load_dotenv(".env", override=False)
 
 app = FastAPI()
@@ -17,10 +17,11 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://localhost:3000/",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3000/",
 ]
-
 app.add_middleware(
-    CORSMiddleware,
+    middleware_class=CORSMiddleware,
     allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],

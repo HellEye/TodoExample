@@ -11,14 +11,11 @@ ENV PATH="${PATH}:/root/.local/bin"
 # Install the Python dependencies
 RUN poetry install
 COPY . .
+# Install prisma and generate the client
 ENV PRISMA_BINARY_CACHE_DIR=/prisma/binaries
 RUN poetry run prisma py fetch
 RUN poetry run prisma generate
 ENV DB_ADDRESS=db:5432
-# ENV PRISMA_BINARY_CACHE_DIR=/prisma/binaries/node_modules/prisma/
-# Run a script for prisma 
-# COPY ./initprisma.sh .
-# RUN ./initprisma.sh
 # Expose the port that the app will run on
 EXPOSE 8000
 # Start the FastAPI app

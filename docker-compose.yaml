@@ -19,7 +19,7 @@ services:
     build: ./backend
     restart: always
     ports:
-      - 5000:5000
+      - 8000:8000
     depends_on:
       - db
     stdin_open: true # docker run -i
@@ -33,5 +33,3 @@ services:
       - 3000:3000
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
