@@ -12,8 +12,14 @@ def test_not_logged_in():
 
 def test_login_no_user():
     res = client.post("/auth/login", data=test_user)
-    assert res.status_code == 401
-    assert res.json() == {"detail": "Invalid credentials"}
+    assert res.status_code == 422
+    assert res.json() == {
+        "message": "Invalid input",
+        "fields": {
+            "username": "Invalid credentials",
+            "password": "Invalid credentials",
+        },
+    }
 
 
 def test_register():

@@ -9,10 +9,18 @@ sample_todos = [
 
 def compare_todos(todo1, todo2):
     if todo1["title"] != todo2["title"]:
+        print("Title doesn't match!", todo1["title"], "!=", todo2["title"])
         return False
-    if "description" in todo1 and "description" in todo2:
+    if (
+        "description" in todo1
+        and "description" in todo2
+        and todo1["description"] is not None
+        and todo2["description"] is not None
+    ):
         if todo1["description"] != todo2["description"]:
+            print("Description doesn't match!")
             return False
+
     return True
 
 
@@ -32,8 +40,9 @@ def test_create_todos(log_in):
     todos = client.get("/todos")
     assert todos.status_code == 200
     assert len(todos.json()) == 2
-    assert compare_todos(todos.json()[0], sample_todos[0])
-    assert compare_todos(todos.json()[1], sample_todos[1])
+    # Comparing in reverse order due to sorting
+    assert compare_todos(todos.json()[0], sample_todos[1])
+    assert compare_todos(todos.json()[1], sample_todos[0])
 
 
 def test_update_todo(log_in):

@@ -2,9 +2,7 @@ import { authManagerStore } from "@/app/auth/authManager";
 import axios, { isAxiosError } from "axios";
 export const py = axios.create({
   // Normally this would likely come from .env
-  // This time I used nextjs redirect, helps with CORS
-  // see next.config.mjs
-  baseURL: "http://home.helleye.net:8000/",
+  baseURL: "http://localhost:8000/",
 });
 
 py.interceptors.request.use((config) => {

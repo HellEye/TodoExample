@@ -75,6 +75,8 @@ def refresh(user: AuthUser):
     return response
 
 
+# Doesn't really do anything since we're not storing tokens
+# In reality, we'd store the token in the database and delete it from there on logout
 @router.post("/logout", response_class=HTMLResponse)
 def logout(user: AuthUser):
     res = HTMLResponse(status_code=status.HTTP_200_OK)

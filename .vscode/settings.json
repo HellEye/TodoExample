@@ -1,17 +1,17 @@
 {
   "files.exclude": {
-    "todo-backend-old": false,
-    "todo-backend/__pycache__": false,
-    "todo-backend/routes/__pycache__": false,
-    "todo-backend/db/__pycache__": false,
-    "todo-frontend/node_modules": false,
-    "node_modules": false,
-    "frontend/.next": false,
-    "frontend/generated": false,
-    "frontend/node_modules": false,
-    "backend/generated": false,
-    "backend/.venv": false,
-    "backend/__pycache__": false
+    "todo-backend-old": true,
+    "todo-backend/__pycache__": true,
+    "todo-backend/routes/__pycache__": true,
+    "todo-backend/db/__pycache__": true,
+    "todo-frontend/node_modules": true,
+    "node_modules": true,
+    "frontend/.next": true,
+    "frontend/generated": true,
+    "frontend/node_modules": true,
+    "backend/generated": true,
+    "backend/.venv": true,
+    "backend/__pycache__": true
   },
   "godot_tools.scene_file_config": "/home/matthew/Coding/TodoExample/backend"
 }

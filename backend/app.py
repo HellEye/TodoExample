@@ -13,12 +13,10 @@ load_dotenv(".env", override=False)
 
 app = FastAPI()
 
+# I hate cors
 origins = [
     "http://localhost:3000",
-    "http://home.helleye.net:3000",
-    "http://home.helleye.net:3000/",
-    "https://home.helleye.net:3000",
-    "https://home.helleye.net:3000/",
+    "http://localhost:3000/",
 ]
 
 app.add_middleware(
