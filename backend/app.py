@@ -1,21 +1,60 @@
+from datetime import timedelta
 import os
 from typing import Annotated
-from fastapi import FastAPI, Depends
+from fastapi import APIRouter, FastAPI, Depends
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from fastapi_login import LoginManager
-from starlette.responses import RedirectResponse
-load_dotenv("../.env")
+from fastapi.exceptions import RequestValidationError
+from starlette.middleware.cors import CORSMiddleware
+from errors import UnauthenticatedException
+from errors import InputException
+
+load_dotenv(".env", override=False)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://home.helleye.net:3000",
+    "http://home.helleye.net:3000/",
+    "https://home.helleye.net:3000",
+    "https://home.helleye.net:3000/",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from db import DB, partials
 
 
-login_manager = LoginManager(os.getenv('SECRET_KEY'), token_url='/auth/login')
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc: RequestValidationError):
+    return JSONResponse(
+        {"message": "Validation error", "fields": exc.body}, status_code=422
+    )
 
-@app.get("/")
+
+@app.exception_handler(InputException)
+async def input_exception_handler(request, exc: InputException):
+    return JSONResponse(
+        {"message": "Invalid input", "fields": exc.fields}, status_code=422
+    )
+
+
+@app.get("")
 async def root(db: DB) -> list[partials.UserBase]:
-    users = db.user.find_many(include={"password": False, "todos":False, "tokens":False})
-    return users 
+    users = db.user.find_many(
+        include={"password": False, "todos": False, "tokens": False}
+    )
+    return users
 
-import auth
+
 import routes
+
+app.include_router(routes.auth_router)
+app.include_router(routes.users_router)
+app.include_router(routes.todo_router)

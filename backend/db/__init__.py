@@ -6,14 +6,19 @@ import generated.prisma.types as types
 import generated.prisma.bases as bases
 from . import partials as partials
 
-db = Prisma()
-db.connect()
-register(db)
-def get_db():
-  try:
-    while True:
-      yield db
-  finally:
-    db.disconnect()
 
-DB = Annotated[Prisma, Depends(get_db)]
+class Database:
+    def __init__(self, db: Prisma):
+        db.connect()
+        self.db = db
+
+    def __call__(self):
+        return self.db
+
+    def __del__(self):
+        self.db.disconnect()
+
+
+db = Database(Prisma())
+
+DB = Annotated[Prisma, Depends(db)]

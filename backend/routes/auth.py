@@ -1,32 +1,81 @@
+from datetime import timedelta
 from typing import Annotated
 
 import bcrypt
-from app import app
-from fastapi import Body, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from auth.user import User, UserInDB,  get_current_user
+from auth import AuthUser, create_access_token
 from db import DB
+from errors import InputException, InvalidCredentialsException
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from models.auth import RegisterUser
 
-# @app.post("/auth/register")
-# def register(db: DB, username:str=Body(...), password:str=Body(...)):
-#     hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-#     user = db.user.create({"username": username, "hashed_password": hashed_password})
-#     return {"message": "User created successfully"}
-
-# @app.post("/auth/login")
-# async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: DB):
-#     user = db.user.find_unique(where= {"username": form_data.username})
-#     if not user:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-#     hashed_password = bcrypt.checkpw(form_data.password, user.password)
-#     if not hashed_password == user.hashed_password:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-#     token = db.token.create({"user": {"connect": {"id": user.id}},"token":"" })
-#     return {"access_token": user.username, "token_type": "bearer"}
+router = APIRouter(prefix="/auth", tags=["auth"])
+EXPIRE_IN = timedelta(minutes=30).seconds
 
 
-# @app.get("/users/me")
-# async def read_users_me(
-#     current_user: Annotated[User, Depends(get_current_user)]
-# ):
-#     return current_user
+@router.post("/login")
+def login(data: Annotated[OAuth2PasswordRequestForm, Depends()], db: DB):
+    username = data.username
+    password = data.password
+    try:
+        user = db.user.find_unique(
+            where={"username": username}, include={"todos": False, "tokens": False}
+        )
+    except:
+        raise InvalidCredentialsException
+    if not user:
+        raise InvalidCredentialsException
+    elif not bcrypt.checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+        raise InvalidCredentialsException
+
+    access_token = create_access_token(
+        data=dict(sub=user.username),
+    )
+    response = JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "access_token": access_token,
+            "token_type": "bearer",
+            "expires_in": EXPIRE_IN,
+        },
+    )
+    return response
+
+
+@router.post("/register")
+def register(db: DB, user: RegisterUser):
+    if user.password != user.repeatPassword:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match"
+        )
+    hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
+    try:
+        user = db.user.create(
+            {"username": user.username, "password": hashed_password.decode("utf-8")}
+        )
+    except:
+        raise InputException().add("username", "Username already exists")
+    return {"message": "User created successfully"}
+
+
+@router.post("/refresh")
+def refresh(user: AuthUser):
+    access_token = create_access_token(
+        data={"user": user.username},
+    )
+    response = JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "access_token": access_token,
+            "token_type": "bearer",
+            "expires_in": EXPIRE_IN,
+        },
+    )
+    return response
+
+
+@router.post("/logout", response_class=HTMLResponse)
+def logout(user: AuthUser):
+    res = HTMLResponse(status_code=status.HTTP_200_OK)
+    return res

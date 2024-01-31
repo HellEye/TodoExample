@@ -5,3 +5,4 @@ generated
 postgres-data
 .env
 *.pyc
+.env.old
